@@ -1,0 +1,1653 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>背诵打卡器 · 种树养成</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      min-height: 100vh;
+      background: linear-gradient(180deg, #e8f5e9 0%, #c8e6c9 100%);
+      padding: 20px;
+      padding-bottom: 100px;
+    }
+
+    .container {
+      max-width: 420px;
+      margin: 0 auto;
+    }
+
+    /* 树的展示区 */
+    .tree-card {
+      background: linear-gradient(180deg, #87CEEB 0%, #98D8AA 50%, #4E7B51 100%);
+      border-radius: 24px;
+      padding: 30px;
+      text-align: center;
+      margin-bottom: 20px;
+      position: relative;
+      overflow: hidden;
+      min-height: 320px;
+    }
+
+    .tree-card::before {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 80px;
+      background: linear-gradient(180deg, transparent, rgba(46, 125, 50, 0.3));
+    }
+
+    /* 太阳 */
+    .sun {
+      position: absolute;
+      top: 20px;
+      right: 30px;
+      width: 50px;
+      height: 50px;
+      background: #FFD93D;
+      border-radius: 50%;
+      box-shadow: 0 0 30px #FFD93D, 0 0 60px rgba(255, 217, 61, 0.5);
+      animation: pulse 3s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.1); opacity: 0.9; }
+    }
+
+    /* 云朵 */
+    .cloud {
+      position: absolute;
+      background: white;
+      border-radius: 50px;
+      opacity: 0.9;
+      animation: float 20s linear infinite;
+    }
+
+    .cloud::before, .cloud::after {
+      content: '';
+      position: absolute;
+      background: white;
+      border-radius: 50%;
+    }
+
+    .cloud-1 {
+      width: 60px;
+      height: 20px;
+      top: 30px;
+      left: -60px;
+    }
+
+    .cloud-1::before {
+      width: 25px;
+      height: 25px;
+      top: -12px;
+      left: 10px;
+    }
+
+    .cloud-1::after {
+      width: 18px;
+      height: 18px;
+      top: -8px;
+      left: 30px;
+    }
+
+    .cloud-2 {
+      width: 50px;
+      height: 16px;
+      top: 60px;
+      left: -100px;
+      animation-delay: -10s;
+    }
+
+    .cloud-2::before {
+      width: 20px;
+      height: 20px;
+      top: -10px;
+      left: 8px;
+    }
+
+    .cloud-2::after {
+      width: 15px;
+      height: 15px;
+      top: -6px;
+      left: 25px;
+    }
+
+    @keyframes float {
+      from { transform: translateX(0); }
+      to { transform: translateX(500px); }
+    }
+
+    /* 树的容器 */
+    .tree-container {
+      position: relative;
+      height: 200px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      margin-bottom: 10px;
+    }
+
+    /* 树的各阶段 */
+    .tree {
+      position: relative;
+      transition: all 0.5s ease;
+    }
+
+    /* 种子 */
+    .tree.seed::before {
+      content: '🌰';
+      font-size: 40px;
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    /* 发芽 */
+    .tree.sprout::before {
+      content: '🌱';
+      font-size: 60px;
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    /* 幼苗 */
+    .tree.seedling::before {
+      content: '🪴';
+      font-size: 80px;
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    /* 小树 */
+    .tree.young::before {
+      content: '🌿';
+      font-size: 100px;
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    /* 成长中的树 */
+    .tree.growing::before {
+      content: '🌳';
+      font-size: 120px;
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    /* 大树 */
+    .tree.mature::before {
+      content: '🌳';
+      font-size: 140px;
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      filter: hue-rotate(-10deg) saturate(1.2);
+    }
+
+    /* 开花 */
+    .tree.flowering::before {
+      content: '🌸';
+      font-size: 140px;
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    /* 结果 */
+    .tree.fruiting::before {
+      content: '🍎';
+      font-size: 140px;
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    /* 土地 */
+    .ground {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 120px;
+      height: 25px;
+      background: #5D4037;
+      border-radius: 50%;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+
+    .ground::before {
+      content: '';
+      position: absolute;
+      top: -5px;
+      left: 10%;
+      width: 80%;
+      height: 10px;
+      background: #6D4C41;
+      border-radius: 50%;
+    }
+
+    /* 树的信息 */
+    .tree-info {
+      position: relative;
+      z-index: 10;
+      color: white;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .tree-name {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 5px;
+    }
+
+    .tree-stage {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+
+    /* 经验值进度条 */
+    .exp-section {
+      background: rgba(255,255,255,0.2);
+      border-radius: 12px;
+      padding: 12px 16px;
+      margin-top: 15px;
+      backdrop-filter: blur(10px);
+    }
+
+    .exp-header {
+      display: flex;
+      justify-content: space-between;
+      color: white;
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+
+    .exp-bar-bg {
+      background: rgba(255,255,255,0.3);
+      border-radius: 10px;
+      height: 12px;
+      overflow: hidden;
+    }
+
+    .exp-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #FFD93D, #FF9800);
+      border-radius: 10px;
+      transition: width 0.5s ease;
+      position: relative;
+    }
+
+    .exp-bar::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 5px;
+      right: 5px;
+      height: 4px;
+      background: rgba(255,255,255,0.4);
+      border-radius: 2px;
+    }
+
+    /* 养分卡片 */
+    .nutrients-card {
+      background: white;
+      border-radius: 20px;
+      padding: 20px;
+      margin-bottom: 16px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+
+    .nutrients-title {
+      font-size: 13px;
+      color: #86868b;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .nutrients-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .nutrient-item {
+      text-align: center;
+      padding: 16px 8px;
+      background: linear-gradient(135deg, #f5f5f7 0%, #e8e8ed 100%);
+      border-radius: 16px;
+      transition: transform 0.2s;
+    }
+
+    .nutrient-item:hover {
+      transform: translateY(-2px);
+    }
+
+    .nutrient-icon {
+      font-size: 28px;
+      margin-bottom: 8px;
+    }
+
+    .nutrient-value {
+      font-size: 20px;
+      font-weight: 600;
+      color: #1d1d1f;
+    }
+
+    .nutrient-label {
+      font-size: 11px;
+      color: #86868b;
+      margin-top: 4px;
+    }
+
+    /* 通用卡片 */
+    .card {
+      background: white;
+      border-radius: 20px;
+      padding: 24px;
+      margin-bottom: 16px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+
+    .card-title {
+      font-size: 13px;
+      color: #86868b;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* 计时器 */
+    .timer-display {
+      text-align: center;
+      padding: 20px 0;
+    }
+
+    .timer-time {
+      font-size: 56px;
+      font-weight: 200;
+      color: #1d1d1f;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .timer-label {
+      color: #86868b;
+      font-size: 14px;
+      margin-top: 8px;
+    }
+
+    /* 音量指示器 */
+    .volume-bar-container {
+      background: #f5f5f7;
+      border-radius: 8px;
+      height: 8px;
+      margin: 20px 0;
+      overflow: hidden;
+    }
+
+    .volume-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #34c759, #30d158);
+      border-radius: 8px;
+      transition: width 0.1s;
+    }
+
+    .volume-bar.low {
+      background: linear-gradient(90deg, #ff9500, #ff3b30);
+    }
+
+    .volume-info {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      color: #86868b;
+    }
+
+    .volume-db {
+      font-weight: 600;
+      color: #1d1d1f;
+    }
+
+    /* 控制按钮 */
+    .controls {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 16px;
+      border: none;
+      border-radius: 14px;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #34c759 0%, #30d158 100%);
+      color: white;
+      box-shadow: 0 4px 15px rgba(52, 199, 89, 0.3);
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      box-shadow: 0 6px 20px rgba(52, 199, 89, 0.4);
+    }
+
+    .btn-secondary {
+      background: #f5f5f7;
+      color: #1d1d1f;
+    }
+
+    .btn-warning {
+      background: linear-gradient(135deg, #ff9500 0%, #ff6b00 100%);
+      color: white;
+    }
+
+    .btn-small {
+      flex: none;
+      padding: 10px 16px;
+      font-size: 14px;
+    }
+
+    /* 状态提示 */
+    .status-tip {
+      text-align: center;
+      padding: 12px;
+      border-radius: 12px;
+      font-size: 14px;
+      margin-top: 16px;
+    }
+
+    .status-tip.recording {
+      background: #e8f5e9;
+      color: #2e7d32;
+    }
+
+    .status-tip.paused {
+      background: #fff3e0;
+      color: #ef6c00;
+    }
+
+    .status-tip.idle {
+      background: #f5f5f7;
+      color: #86868b;
+    }
+
+    /* 成就徽章 */
+    .achievements-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+
+    .achievement {
+      text-align: center;
+      padding: 12px 8px;
+      background: #f5f5f7;
+      border-radius: 12px;
+      transition: all 0.3s;
+    }
+
+    .achievement.unlocked {
+      background: linear-gradient(135deg, #fff9e6 0%, #fff3cd 100%);
+      box-shadow: 0 2px 8px rgba(255, 193, 7, 0.3);
+    }
+
+    .achievement.locked {
+      opacity: 0.5;
+      filter: grayscale(1);
+    }
+
+    .achievement-icon {
+      font-size: 28px;
+      margin-bottom: 4px;
+    }
+
+    .achievement-name {
+      font-size: 10px;
+      color: #86868b;
+    }
+
+    /* 日历 */
+    .calendar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .calendar-nav {
+      display: flex;
+      gap: 8px;
+    }
+
+    .calendar-nav button {
+      background: #f5f5f7;
+      border: none;
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .calendar-month {
+      font-size: 15px;
+      font-weight: 600;
+      color: #1d1d1f;
+    }
+
+    .calendar-weekdays {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      text-align: center;
+      margin-bottom: 8px;
+    }
+
+    .calendar-weekdays span {
+      font-size: 12px;
+      color: #86868b;
+      padding: 8px 0;
+    }
+
+    .calendar-days {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+    }
+
+    .calendar-day {
+      aspect-ratio: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      border-radius: 50%;
+      color: #1d1d1f;
+      position: relative;
+    }
+
+    .calendar-day.other-month {
+      color: #c7c7cc;
+    }
+
+    .calendar-day.today {
+      background: #f5f5f7;
+      font-weight: 600;
+    }
+
+    .calendar-day.checked {
+      background: linear-gradient(135deg, #34c759, #30d158);
+      color: white;
+    }
+
+    .calendar-day.checked::after {
+      content: '🌱';
+      position: absolute;
+      font-size: 8px;
+      bottom: -2px;
+    }
+
+    /* 弹窗 */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s;
+    }
+
+    .modal-overlay.show {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal {
+      background: white;
+      border-radius: 24px;
+      padding: 40px 30px;
+      text-align: center;
+      max-width: 320px;
+      width: 90%;
+      transform: scale(0.9);
+      transition: transform 0.3s;
+    }
+
+    .modal-overlay.show .modal {
+      transform: scale(1);
+    }
+
+    .modal-icon {
+      font-size: 72px;
+      margin-bottom: 16px;
+      animation: bounce 0.6s ease;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+    }
+
+    .modal h2 {
+      font-size: 24px;
+      color: #1d1d1f;
+      margin-bottom: 8px;
+    }
+
+    .modal p {
+      color: #86868b;
+      font-size: 15px;
+      margin-bottom: 12px;
+      line-height: 1.5;
+    }
+
+    .modal-reward {
+      background: linear-gradient(135deg, #fff9e6 0%, #fff3cd 100%);
+      border-radius: 12px;
+      padding: 12px;
+      margin: 16px 0;
+      font-size: 14px;
+      color: #f57c00;
+    }
+
+    .modal .btn {
+      width: 100%;
+      margin-top: 8px;
+    }
+
+    /* 升级动画 */
+    .level-up-animation {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 100px;
+      z-index: 200;
+      animation: levelUp 1.5s ease forwards;
+      pointer-events: none;
+    }
+
+    @keyframes levelUp {
+      0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+      30% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
+      70% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+      100% { opacity: 0; transform: translate(-50%, -50%) scale(1.5); }
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* 设置 */
+    .setting-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid #f5f5f7;
+    }
+
+    .setting-item:last-child {
+      border-bottom: none;
+    }
+
+    .setting-label {
+      font-size: 15px;
+      color: #1d1d1f;
+    }
+
+    .setting-input {
+      width: 80px;
+      padding: 8px 12px;
+      border: 1px solid #e5e5ea;
+      border-radius: 8px;
+      font-size: 15px;
+      text-align: center;
+    }
+
+    /* 小树命名输入 */
+    .tree-name-input {
+      background: rgba(255,255,255,0.2);
+      border: 2px dashed rgba(255,255,255,0.5);
+      border-radius: 8px;
+      padding: 8px 16px;
+      color: white;
+      font-size: 18px;
+      font-weight: 600;
+      text-align: center;
+      width: 150px;
+      outline: none;
+    }
+
+    .tree-name-input::placeholder {
+      color: rgba(255,255,255,0.7);
+    }
+
+    /* 数据管理 */
+    .data-section {
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid #f5f5f7;
+    }
+
+    .data-title {
+      font-size: 13px;
+      color: #86868b;
+      margin-bottom: 12px;
+    }
+
+    .data-buttons {
+      display: flex;
+      gap: 10px;
+    }
+
+    .data-buttons .btn {
+      flex: 1;
+      padding: 12px;
+      font-size: 14px;
+    }
+
+    .btn-export {
+      background: linear-gradient(135deg, #5856D6 0%, #AF52DE 100%);
+      color: white;
+    }
+
+    .btn-import {
+      background: linear-gradient(135deg, #007AFF 0%, #5AC8FA 100%);
+      color: white;
+    }
+
+    .btn-reset {
+      background: #ff3b30;
+      color: white;
+      flex: 0.6 !important;
+    }
+
+    .file-input {
+      display: none;
+    }
+
+    /* 提示消息 */
+    .toast {
+      position: fixed;
+      bottom: 100px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: rgba(0,0,0,0.8);
+      color: white;
+      padding: 12px 24px;
+      border-radius: 25px;
+      font-size: 14px;
+      opacity: 0;
+      transition: all 0.3s;
+      z-index: 300;
+      pointer-events: none;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* 统计卡片 */
+    .stats-card {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 20px;
+      padding: 20px;
+      margin-bottom: 16px;
+      color: white;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+
+    .stat-item {
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 28px;
+      font-weight: 700;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      opacity: 0.9;
+      margin-top: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- 树的展示区 -->
+    <div class="tree-card">
+      <div class="sun"></div>
+      <div class="cloud cloud-1"></div>
+      <div class="cloud cloud-2"></div>
+      
+      <div class="tree-container">
+        <div class="ground"></div>
+        <div class="tree seed" id="tree"></div>
+      </div>
+      
+      <div class="tree-info">
+        <input type="text" class="tree-name-input" id="treeName" placeholder="给小树起名" maxlength="8" onchange="saveTreeName()">
+        <div class="tree-stage" id="treeStage">种子 · Lv.1</div>
+      </div>
+      
+      <div class="exp-section">
+        <div class="exp-header">
+          <span>成长值</span>
+          <span><span id="currentExp">0</span> / <span id="nextLevelExp">100</span></span>
+        </div>
+        <div class="exp-bar-bg">
+          <div class="exp-bar" id="expBar" style="width: 0%"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 累计统计 -->
+    <div class="stats-card">
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div class="stat-value" id="totalDays">0</div>
+          <div class="stat-label">累计打卡天数</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="totalHours">0</div>
+          <div class="stat-label">累计背诵小时</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="maxStreak">0</div>
+          <div class="stat-label">最长连续天数</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="avgMinutes">0</div>
+          <div class="stat-label">日均分钟数</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 养分统计 -->
+    <div class="nutrients-card">
+      <div class="nutrients-title">🌱 今日养分</div>
+      <div class="nutrients-grid">
+        <div class="nutrient-item">
+          <div class="nutrient-icon">💧</div>
+          <div class="nutrient-value" id="todayMinutes">0</div>
+          <div class="nutrient-label">背诵分钟</div>
+        </div>
+        <div class="nutrient-item">
+          <div class="nutrient-icon">☀️</div>
+          <div class="nutrient-value" id="todayExp">+0</div>
+          <div class="nutrient-label">获得经验</div>
+        </div>
+        <div class="nutrient-item">
+          <div class="nutrient-icon">🔥</div>
+          <div class="nutrient-value" id="streakDays">0</div>
+          <div class="nutrient-label">连续天数</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 计时器 -->
+    <div class="card">
+      <div class="card-title">📖 背诵计时</div>
+      <div class="timer-display">
+        <div class="timer-time" id="timerDisplay">00:00</div>
+        <div class="timer-label">为小树浇水吧</div>
+      </div>
+
+      <div id="volumeSection" class="hidden">
+        <div class="volume-bar-container">
+          <div class="volume-bar" id="volumeBar"></div>
+        </div>
+        <div class="volume-info">
+          <span>朗读音量</span>
+          <span class="volume-db"><span id="volumeDb">0</span> dB</span>
+        </div>
+      </div>
+
+      <div class="status-tip idle" id="statusTip">
+        点击"开始背诵"为小树浇水 💧
+      </div>
+
+      <div class="controls">
+        <button class="btn btn-primary" id="startBtn" onclick="startRecording()">
+          🌱 开始背诵
+        </button>
+        <button class="btn btn-secondary" id="pauseBtn" onclick="pauseRecording()" disabled>
+          暂停
+        </button>
+        <button class="btn btn-warning" id="finishBtn" onclick="finishRecording()" disabled>
+          完成
+        </button>
+      </div>
+    </div>
+
+    <!-- 成就徽章 -->
+    <div class="card">
+      <div class="card-title">🏆 成就徽章</div>
+      <div class="achievements-grid" id="achievementsGrid">
+        <!-- 动态生成 -->
+      </div>
+    </div>
+
+    <!-- 打卡日历 -->
+    <div class="card">
+      <div class="calendar-header">
+        <div class="card-title" style="margin:0">📅 成长日历</div>
+        <div class="calendar-nav">
+          <button onclick="changeMonth(-1)">‹</button>
+          <span class="calendar-month" id="calendarMonth">2024年1月</span>
+          <button onclick="changeMonth(1)">›</button>
+        </div>
+      </div>
+      <div class="calendar-weekdays">
+        <span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span>
+      </div>
+      <div class="calendar-days" id="calendarDays"></div>
+    </div>
+
+    <!-- 设置 -->
+    <div class="card">
+      <div class="card-title">⚙️ 设置</div>
+      <div class="setting-item">
+        <span class="setting-label">每日目标（分钟）</span>
+        <input type="number" class="setting-input" id="goalInput" value="15" min="1" max="120" onchange="updateGoal()">
+      </div>
+      <div class="setting-item">
+        <span class="setting-label">音量阈值（dB）</span>
+        <input type="number" class="setting-input" id="thresholdInput" value="40" min="20" max="80" onchange="updateThreshold()">
+      </div>
+
+      <!-- 数据管理 -->
+      <div class="data-section">
+        <div class="data-title">📦 数据管理</div>
+        <div class="data-buttons">
+          <button class="btn btn-export btn-small" onclick="exportData()">
+            📤 导出备份
+          </button>
+          <button class="btn btn-import btn-small" onclick="document.getElementById('importFile').click()">
+            📥 导入数据
+          </button>
+          <input type="file" id="importFile" class="file-input" accept=".json" onchange="importData(event)">
+          <button class="btn btn-reset btn-small" onclick="confirmReset()">
+            🗑️ 重置
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 使用说明 -->
+    <div class="card">
+      <div class="card-title">💡 使用说明</div>
+      <div style="font-size: 14px; color: #666; line-height: 1.8;">
+        <p>1. 点击「开始背诵」按钮，大声朗读</p>
+        <p>2. 每分钟背诵可获得 <strong>10 成长值</strong></p>
+        <p>3. 连续打卡有额外加成（最高+100%）</p>
+        <p>4. 小树会随着成长值升级变化</p>
+        <p>5. 记得定期「导出备份」保存数据</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 完成弹窗 -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+      <div class="modal-icon" id="modalIcon">🌱</div>
+      <h2 id="modalTitle">浇水成功！</h2>
+      <p id="modalText">小树获得了养分，正在茁壮成长~</p>
+      <div class="modal-reward" id="modalReward">
+        +10 成长值 · +5 分钟背诵
+      </div>
+      <button class="btn btn-primary" onclick="closeModal()">继续加油</button>
+    </div>
+  </div>
+
+  <!-- 确认重置弹窗 -->
+  <div class="modal-overlay" id="resetModalOverlay">
+    <div class="modal">
+      <div class="modal-icon">⚠️</div>
+      <h2>确认重置？</h2>
+      <p>这将清除所有数据，包括小树、打卡记录和成就，此操作不可恢复！</p>
+      <button class="btn btn-reset" onclick="resetData()" style="margin-bottom: 10px;">确认重置</button>
+      <button class="btn btn-secondary" onclick="closeResetModal()">取消</button>
+    </div>
+  </div>
+
+  <!-- Toast 提示 -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // 树的成长阶段配置
+    const TREE_STAGES = [
+      { name: '种子', class: 'seed', minExp: 0, icon: '🌰' },
+      { name: '发芽', class: 'sprout', minExp: 100, icon: '🌱' },
+      { name: '幼苗', class: 'seedling', minExp: 300, icon: '🪴' },
+      { name: '小树', class: 'young', minExp: 600, icon: '🌿' },
+      { name: '成长', class: 'growing', minExp: 1000, icon: '🌳' },
+      { name: '大树', class: 'mature', minExp: 1500, icon: '🌳' },
+      { name: '开花', class: 'flowering', minExp: 2200, icon: '🌸' },
+      { name: '结果', class: 'fruiting', minExp: 3000, icon: '🍎' }
+    ];
+
+    // 成就配置
+    const ACHIEVEMENTS = [
+      { id: 'first', name: '初次浇水', icon: '💧', condition: (d) => d.totalMinutes >= 1 },
+      { id: 'week', name: '坚持一周', icon: '📅', condition: (d) => d.maxStreak >= 7 },
+      { id: 'month', name: '坚持一月', icon: '🗓️', condition: (d) => d.maxStreak >= 30 },
+      { id: 'hour', name: '累计1小时', icon: '⏰', condition: (d) => d.totalMinutes >= 60 },
+      { id: 'sprout', name: '发芽了', icon: '🌱', condition: (d) => d.totalExp >= 100 },
+      { id: 'tree', name: '长成小树', icon: '🌳', condition: (d) => d.totalExp >= 1000 },
+      { id: 'flower', name: '开花啦', icon: '🌸', condition: (d) => d.totalExp >= 2200 },
+      { id: 'fruit', name: '结果实', icon: '🍎', condition: (d) => d.totalExp >= 3000 }
+    ];
+
+    // 状态变量
+    let isRecording = false;
+    let isPaused = false;
+    let startTime = null;
+    let pausedTime = 0;
+    let timerInterval = null;
+    let audioContext = null;
+    let analyser = null;
+    let currentMonth = new Date();
+
+    // 数据
+    let data = {
+      treeName: '',
+      totalExp: 0,
+      records: [],
+      dailyGoal: 15,
+      threshold: 40,
+      maxStreak: 0,
+      achievements: [],
+      createdAt: new Date().toISOString()
+    };
+
+    // 初始化
+    function init() {
+      loadData();
+      updateTreeDisplay();
+      updateNutrients();
+      updateTotalStats();
+      renderAchievements();
+      renderCalendar();
+      document.getElementById('treeName').value = data.treeName;
+      document.getElementById('goalInput').value = data.dailyGoal;
+      document.getElementById('thresholdInput').value = data.threshold;
+    }
+
+    function loadData() {
+      const saved = localStorage.getItem('treeReciteData');
+      if (saved) {
+        data = { ...data, ...JSON.parse(saved) };
+      }
+    }
+
+    function saveData() {
+      localStorage.setItem('treeReciteData', JSON.stringify(data));
+    }
+
+    function saveTreeName() {
+      data.treeName = document.getElementById('treeName').value;
+      saveData();
+    }
+
+    // 导出数据
+    function exportData() {
+      const exportObj = {
+        ...data,
+        exportedAt: new Date().toISOString(),
+        version: '1.0'
+      };
+      
+      const dataStr = JSON.stringify(exportObj, null, 2);
+      const blob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      
+      const a = document.createElement('a');
+      const date = new Date().toLocaleDateString('zh-CN').replace(/\//g, '-');
+      a.href = url;
+      a.download = `背诵打卡数据_${data.treeName || '小树'}_${date}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      showToast('✅ 数据已导出到文件');
+    }
+
+    // 导入数据
+    function importData(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const importedData = JSON.parse(e.target.result);
+          
+          // 验证数据格式
+          if (typeof importedData.totalExp !== 'number' || !Array.isArray(importedData.records)) {
+            throw new Error('数据格式不正确');
+          }
+          
+          // 合并或覆盖数据
+          if (data.records.length > 0) {
+            if (confirm('检测到已有数据，是否覆盖？\n点击"确定"覆盖，点击"取消"合并数据')) {
+              // 覆盖
+              data = { ...data, ...importedData };
+            } else {
+              // 合并记录
+              const existingDates = new Set(data.records.map(r => r.date));
+              importedData.records.forEach(record => {
+                if (!existingDates.has(record.date)) {
+                  data.records.push(record);
+                }
+              });
+              data.totalExp = Math.max(data.totalExp, importedData.totalExp);
+              data.maxStreak = Math.max(data.maxStreak, importedData.maxStreak || 0);
+              // 合并成就
+              importedData.achievements?.forEach(ach => {
+                if (!data.achievements.includes(ach)) {
+                  data.achievements.push(ach);
+                }
+              });
+            }
+          } else {
+            data = { ...data, ...importedData };
+          }
+          
+          saveData();
+          
+          // 刷新显示
+          document.getElementById('treeName').value = data.treeName;
+          updateTreeDisplay();
+          updateNutrients();
+          updateTotalStats();
+          renderAchievements();
+          renderCalendar();
+          
+          showToast('✅ 数据导入成功！');
+        } catch (err) {
+          showToast('❌ 导入失败：文件格式错误');
+          console.error(err);
+        }
+      };
+      reader.readAsText(file);
+      
+      // 清空 input，允许重复选择同一文件
+      event.target.value = '';
+    }
+
+    // 重置数据
+    function confirmReset() {
+      document.getElementById('resetModalOverlay').classList.add('show');
+    }
+
+    function closeResetModal() {
+      document.getElementById('resetModalOverlay').classList.remove('show');
+    }
+
+    function resetData() {
+      localStorage.removeItem('treeReciteData');
+      data = {
+        treeName: '',
+        totalExp: 0,
+        records: [],
+        dailyGoal: 15,
+        threshold: 40,
+        maxStreak: 0,
+        achievements: [],
+        createdAt: new Date().toISOString()
+      };
+      
+      document.getElementById('treeName').value = '';
+      updateTreeDisplay();
+      updateNutrients();
+      updateTotalStats();
+      renderAchievements();
+      renderCalendar();
+      
+      closeResetModal();
+      showToast('🔄 数据已重置');
+    }
+
+    // Toast 提示
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2500);
+    }
+
+    // 树的显示更新
+    function updateTreeDisplay() {
+      const tree = document.getElementById('tree');
+      const stageText = document.getElementById('treeStage');
+      const expBar = document.getElementById('expBar');
+      const currentExpEl = document.getElementById('currentExp');
+      const nextLevelExpEl = document.getElementById('nextLevelExp');
+
+      // 找到当前阶段
+      let currentStage = TREE_STAGES[0];
+      let nextStage = TREE_STAGES[1];
+      
+      for (let i = TREE_STAGES.length - 1; i >= 0; i--) {
+        if (data.totalExp >= TREE_STAGES[i].minExp) {
+          currentStage = TREE_STAGES[i];
+          nextStage = TREE_STAGES[i + 1] || TREE_STAGES[i];
+          break;
+        }
+      }
+
+      // 更新树的样式
+      tree.className = 'tree ' + currentStage.class;
+      
+      // 更新阶段文字
+      const level = TREE_STAGES.indexOf(currentStage) + 1;
+      stageText.textContent = `${currentStage.name} · Lv.${level}`;
+
+      // 更新经验条
+      const expInLevel = data.totalExp - currentStage.minExp;
+      const expNeeded = nextStage.minExp - currentStage.minExp;
+      const percent = currentStage === nextStage ? 100 : Math.min(100, (expInLevel / expNeeded) * 100);
+      
+      expBar.style.width = percent + '%';
+      currentExpEl.textContent = data.totalExp;
+      nextLevelExpEl.textContent = nextStage.minExp;
+    }
+
+    // 更新养分显示
+    function updateNutrients() {
+      const today = getDateString(new Date());
+      const todayRecord = data.records.find(r => r.date === today);
+      const todayMins = todayRecord ? Math.floor(todayRecord.duration / 60) : 0;
+      const todayExpGain = todayRecord ? todayRecord.expGain || 0 : 0;
+      
+      document.getElementById('todayMinutes').textContent = todayMins;
+      document.getElementById('todayExp').textContent = '+' + todayExpGain;
+      
+      const streak = calculateStreak();
+      document.getElementById('streakDays').textContent = streak;
+      
+      if (streak > data.maxStreak) {
+        data.maxStreak = streak;
+        saveData();
+      }
+    }
+
+    // 更新累计统计
+    function updateTotalStats() {
+      const totalDays = data.records.length;
+      const totalSeconds = data.records.reduce((sum, r) => sum + r.duration, 0);
+      const totalHours = (totalSeconds / 3600).toFixed(1);
+      const avgMinutes = totalDays > 0 ? Math.round(totalSeconds / 60 / totalDays) : 0;
+      
+      document.getElementById('totalDays').textContent = totalDays;
+      document.getElementById('totalHours').textContent = totalHours;
+      document.getElementById('maxStreak').textContent = data.maxStreak;
+      document.getElementById('avgMinutes').textContent = avgMinutes;
+    }
+
+    function calculateStreak() {
+      if (data.records.length === 0) return 0;
+      
+      const dates = data.records.map(r => r.date).sort().reverse();
+      const today = getDateString(new Date());
+      const yesterday = getDateString(new Date(Date.now() - 86400000));
+      
+      if (dates[0] !== today && dates[0] !== yesterday) return 0;
+      
+      let streak = 1;
+      for (let i = 1; i < dates.length; i++) {
+        const prev = new Date(dates[i-1]);
+        const curr = new Date(dates[i]);
+        const diff = (prev - curr) / 86400000;
+        if (diff === 1) streak++;
+        else break;
+      }
+      return streak;
+    }
+
+    // 计时器控制
+    async function startRecording() {
+      if (!audioContext) {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          audioContext = new (window.AudioContext || window.webkitAudioContext)();
+          analyser = audioContext.createAnalyser();
+          const source = audioContext.createMediaStreamSource(stream);
+          source.connect(analyser);
+          analyser.fftSize = 256;
+        } catch (err) {
+          alert('需要麦克风权限来检测背诵音量');
+          return;
+        }
+      }
+
+      if (isPaused) {
+        isPaused = false;
+        startTime = Date.now() - pausedTime;
+      } else {
+        startTime = Date.now();
+        pausedTime = 0;
+      }
+
+      isRecording = true;
+      document.getElementById('startBtn').disabled = true;
+      document.getElementById('pauseBtn').disabled = false;
+      document.getElementById('finishBtn').disabled = false;
+      document.getElementById('volumeSection').classList.remove('hidden');
+      
+      updateStatus('recording', '🎙️ 正在为小树浇水...');
+      
+      timerInterval = setInterval(updateTimer, 100);
+      updateVolume();
+    }
+
+    function pauseRecording() {
+      isPaused = true;
+      isRecording = false;
+      pausedTime = Date.now() - startTime;
+      clearInterval(timerInterval);
+      
+      document.getElementById('startBtn').disabled = false;
+      document.getElementById('startBtn').textContent = '▶️ 继续';
+      document.getElementById('pauseBtn').disabled = true;
+      
+      updateStatus('paused', '⏸️ 暂停中，小树在等你~');
+    }
+
+    function finishRecording() {
+      isRecording = false;
+      isPaused = false;
+      clearInterval(timerInterval);
+      
+      const duration = Math.floor((Date.now() - startTime) / 1000);
+      const minutes = Math.floor(duration / 60);
+      
+      // 计算获得的经验值
+      const streak = calculateStreak();
+      const streakBonus = Math.min(streak * 0.1, 1);
+      const baseExp = minutes * 10;
+      const expGain = Math.floor(baseExp * (1 + streakBonus));
+      
+      const oldExp = data.totalExp;
+      data.totalExp += expGain;
+      
+      // 保存记录
+      const today = getDateString(new Date());
+      const existingIndex = data.records.findIndex(r => r.date === today);
+      
+      if (existingIndex >= 0) {
+        data.records[existingIndex].duration += duration;
+        data.records[existingIndex].expGain = (data.records[existingIndex].expGain || 0) + expGain;
+      } else {
+        data.records.push({ date: today, duration, expGain });
+      }
+      
+      saveData();
+
+      // 检查是否升级
+      const oldStage = getStageByExp(oldExp);
+      const newStage = getStageByExp(data.totalExp);
+      
+      if (newStage.minExp > oldStage.minExp) {
+        showLevelUpAnimation(newStage.icon);
+      }
+
+      // 重置UI
+      document.getElementById('timerDisplay').textContent = '00:00';
+      document.getElementById('startBtn').disabled = false;
+      document.getElementById('startBtn').textContent = '🌱 开始背诵';
+      document.getElementById('pauseBtn').disabled = true;
+      document.getElementById('finishBtn').disabled = true;
+      document.getElementById('volumeSection').classList.add('hidden');
+      
+      updateStatus('idle', '点击"开始背诵"为小树浇水 💧');
+      
+      // 更新显示
+      updateTreeDisplay();
+      updateNutrients();
+      updateTotalStats();
+      checkAchievements();
+      renderAchievements();
+      renderCalendar();
+      
+      // 显示完成弹窗
+      showModal(duration, expGain, streakBonus);
+      
+      startTime = null;
+      pausedTime = 0;
+    }
+
+    function getStageByExp(exp) {
+      for (let i = TREE_STAGES.length - 1; i >= 0; i--) {
+        if (exp >= TREE_STAGES[i].minExp) {
+          return TREE_STAGES[i];
+        }
+      }
+      return TREE_STAGES[0];
+    }
+
+    function showLevelUpAnimation(icon) {
+      const el = document.createElement('div');
+      el.className = 'level-up-animation';
+      el.textContent = icon;
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 1500);
+    }
+
+    function updateTimer() {
+      const elapsed = Date.now() - startTime;
+      const seconds = Math.floor(elapsed / 1000);
+      const mins = Math.floor(seconds / 60);
+      const secs = seconds % 60;
+      document.getElementById('timerDisplay').textContent = 
+        `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    function updateVolume() {
+      if (!isRecording) return;
+
+      const dataArray = new Uint8Array(analyser.frequencyBinCount);
+      analyser.getByteFrequencyData(dataArray);
+      const average = dataArray.reduce((a, b) => a + b) / dataArray.length;
+      const db = Math.round(average * 100 / 256);
+      
+      document.getElementById('volumeDb').textContent = db;
+      const bar = document.getElementById('volumeBar');
+      bar.style.width = Math.min(db, 100) + '%';
+      
+      if (db < data.threshold) {
+        bar.classList.add('low');
+      } else {
+        bar.classList.remove('low');
+      }
+
+      requestAnimationFrame(updateVolume);
+    }
+
+    function updateStatus(type, text) {
+      const tip = document.getElementById('statusTip');
+      tip.className = 'status-tip ' + type;
+      tip.textContent = text;
+    }
+
+    // 成就系统
+    function checkAchievements() {
+      const stats = {
+        totalMinutes: Math.floor(data.records.reduce((sum, r) => sum + r.duration, 0) / 60),
+        totalExp: data.totalExp,
+        maxStreak: data.maxStreak
+      };
+
+      ACHIEVEMENTS.forEach(ach => {
+        if (!data.achievements.includes(ach.id) && ach.condition(stats)) {
+          data.achievements.push(ach.id);
+          showToast(`🏆 解锁成就：${ach.name}`);
+        }
+      });
+      saveData();
+    }
+
+    function renderAchievements() {
+      const grid = document.getElementById('achievementsGrid');
+      grid.innerHTML = ACHIEVEMENTS.map(ach => {
+        const unlocked = data.achievements.includes(ach.id);
+        return `
+          <div class="achievement ${unlocked ? 'unlocked' : 'locked'}">
+            <div class="achievement-icon">${ach.icon}</div>
+            <div class="achievement-name">${ach.name}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // 日历
+    function renderCalendar() {
+      const year = currentMonth.getFullYear();
+      const month = currentMonth.getMonth();
+      
+      document.getElementById('calendarMonth').textContent = `${year}年${month + 1}月`;
+      
+      const firstDay = new Date(year, month, 1);
+      const lastDay = new Date(year, month + 1, 0);
+      const startDay = firstDay.getDay();
+      const totalDays = lastDay.getDate();
+      
+      const today = new Date();
+      const todayStr = getDateString(today);
+      const checkedDates = new Set(data.records.map(r => r.date));
+      
+      let html = '';
+      
+      const prevMonthLast = new Date(year, month, 0).getDate();
+      for (let i = startDay - 1; i >= 0; i--) {
+        html += `<div class="calendar-day other-month">${prevMonthLast - i}</div>`;
+      }
+      
+      for (let d = 1; d <= totalDays; d++) {
+        const dateStr = `${year}-${(month+1).toString().padStart(2,'0')}-${d.toString().padStart(2,'0')}`;
+        const isToday = dateStr === todayStr;
+        const isChecked = checkedDates.has(dateStr);
+        
+        let classes = 'calendar-day';
+        if (isToday) classes += ' today';
+        if (isChecked) classes += ' checked';
+        
+        html += `<div class="${classes}">${d}</div>`;
+      }
+      
+      const remaining = 42 - (startDay + totalDays);
+      for (let i = 1; i <= remaining && i <= 7; i++) {
+        html += `<div class="calendar-day other-month">${i}</div>`;
+      }
+      
+      document.getElementById('calendarDays').innerHTML = html;
+    }
+
+    function changeMonth(delta) {
+      currentMonth.setMonth(currentMonth.getMonth() + delta);
+      renderCalendar();
+    }
+
+    // 弹窗
+    function showModal(duration, expGain, streakBonus) {
+      const mins = Math.floor(duration / 60);
+      const secs = duration % 60;
+      const stage = getStageByExp(data.totalExp);
+      
+      document.getElementById('modalIcon').textContent = stage.icon;
+      document.getElementById('modalTitle').textContent = '浇水成功！';
+      document.getElementById('modalText').textContent = 
+        `本次背诵 ${mins}分${secs}秒，小树正在茁壮成长~`;
+      
+      const bonusText = streakBonus > 0 ? ` (含连续${Math.round(streakBonus*100)}%加成)` : '';
+      document.getElementById('modalReward').textContent = 
+        `+${expGain} 成长值${bonusText}`;
+      
+      document.getElementById('modalOverlay').classList.add('show');
+    }
+
+    function closeModal() {
+      document.getElementById('modalOverlay').classList.remove('show');
+    }
+
+    // 设置
+    function updateGoal() {
+      data.dailyGoal = parseInt(document.getElementById('goalInput').value) || 15;
+      saveData();
+    }
+
+    function updateThreshold() {
+      data.threshold = parseInt(document.getElementById('thresholdInput').value) || 40;
+      saveData();
+    }
+
+    // 工具函数
+    function getDateString(date) {
+      return `${date.getFullYear()}-${(date.getMonth()+1).toString().padStart(2,'0')}-${date.getDate().toString().padStart(2,'0')}`;
+    }
+
+    // 启动
+    init();
+  </script>
+</body>
+</html>
